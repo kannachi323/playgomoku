@@ -1,39 +1,41 @@
 package game
 
 type Result int
+
 const (
-    Win Result = iota
-    Draw
-    Pending 
+	Win Result = iota
+	Draw
+	Pending
 )
+
 type Status int
+
 const (
-    Active Status = iota
-    Offline
+	Active Status = iota
+	Offline
 )
 
 type Color int
+
 const (
-    _ Color = iota
-    White
-    Black
+	_ Color = iota
+	White
+	Black
 )
 
 type Move struct {
-    R int
-    C int
-    Player Player
+	R      int
+	C      int
+	Player Player
 }
 
 type Player struct {
-    ID    string
-    Name  string
-    Color Color
+	PlayerID string
+	Color    Color
 }
 
 type Room struct {
-    RoomID int
-    Players [2]Player
-    Status string
-
+	RoomID  int
+	Players [2]Player
+	Status  string
 }

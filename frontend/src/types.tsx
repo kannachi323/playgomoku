@@ -5,7 +5,6 @@ export interface Conn {
 }
 
 export interface Player {
-    id: string
-    name: string
-    color: Number
+    playerID: string
+    color: number
 }

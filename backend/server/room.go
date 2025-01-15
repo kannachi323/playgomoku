@@ -17,27 +17,20 @@ type Room struct {
 	
 }
 
-
 func (rm *Room) addConnection(ws *websocket.Conn, player *game.Player) {
+    rm.mu.Lock()
+    defer rm.mu.Unlock()
+
+    if rm.conns == nil || rm.players == nil {
+        ws.Write([]byte("error: broken resources"))
+	}
+
+    rm.conns[ws] = true
+    rm.players[player] = ws
+
 	rm.mu.Lock()
-	defer rm.mu.Unlock()
-
-	if rm.conns == nil {
-		rm.conns = make(map[*websocket.Conn]bool)
-	}
-
-	//need to check if player id is already in the room (can't connect > 1 times)
-	if _, ok := rm.players[player]; ok {
-		fmt.Println("Player already in room")
-		return	
-	}
-	
-	rm.conns[ws] = true
-
-	rm.players[player] = ws
-
-	fmt.Printf("Player %s joined room %s\n", player.Name, rm.roomID)
-
+	ws.Write([]byte(fmt.Sprintf("Player %s joined room %s\n", player.PlayerID, rm.roomID)))
+	rm.mu.Unlock()
 }
 
 
@@ -52,11 +45,6 @@ func (rm *Room) removeConnection(ws *websocket.Conn) {
 	_ = ws.Close()
 
 	fmt.Printf("Connection removed from room %s\n", rm.roomID)
-
-	// Check if the room is empty
-	if len(rm.conns) == 0 {
-		fmt.Printf("Room %s is now empty\n", rm.roomID)
-	}
 }
 
 func (rm *Room) broadcast(message []byte) {
@@ -71,5 +59,11 @@ func (rm *Room) broadcast(message []byte) {
 		}(ws)
 	}
 }
+
+func (rm *Room) startGame() {
+    rm.game = game.CreateGame(15)
+    rm.broadcast([]byte("Game has started!"))
+}
+
 
 

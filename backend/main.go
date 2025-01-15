@@ -9,6 +9,7 @@ import (
 )
 func main() {
 	server := server.NewServer()
+
 	http.Handle("/ws", websocket.Handler(server.HandleWS))
 	http.ListenAndServe(":3000", nil)
 }

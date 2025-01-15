@@ -3,8 +3,7 @@ package server
 import "playgomoku/backend/game"
 
 type PlayerData struct {
-    Id  string `json:"id"`
-    Name string `json:"name"`
+    PlayerID  string `json:"id"`
 	Color game.Color `json:"color"`
 }
 

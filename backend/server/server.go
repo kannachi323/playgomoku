@@ -4,72 +4,92 @@ import (
 	"fmt"
 	"io"
 	"playgomoku/backend/game"
+	"strconv"
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/net/websocket"
 )
 
 type Server struct {
 	rooms map[string]*Room
+	queue []string
 	mu    sync.Mutex
 	startTime time.Time
 }
 
 func NewServer() *Server {
+	defaultRooms := make(map[string]*Room)
+	defaultQueue := make([]string, 0)
+
+	for i := 0; i < 5; i++ {
+		newRoomID := uuid.New().String()
+		defaultRooms[newRoomID] = &Room{
+			roomID: uuid.New().String(),
+			conns: make(map[*websocket.Conn]bool),
+			game: nil,
+			players: make(map[*game.Player]*websocket.Conn),
+		}
+		defaultQueue = append(defaultQueue, newRoomID)
+	}
+
 	return &Server{
-		rooms: make(map[string]*Room),
+		rooms: defaultRooms,
+		queue: defaultQueue,
 		startTime: time.Now(),
 	}
 }
 
 func (s *Server) HandleWS(ws *websocket.Conn) {
-	fmt.Println(ws.RemoteAddr(), " just connected")
+    // Handle incoming WebSocket connection
+    s.mu.Lock()
+    defer s.mu.Unlock() // Ensures the mutex is always released, even on early return
 
-	var data ConnData
-    if err := websocket.JSON.Receive(ws, &data); err != nil {
-        fmt.Println("Error receiving JSON data:", err)
+    ws.Write([]byte(fmt.Sprintf("Incoming WebSocket connection from: %s", ws.RemoteAddr())))
+
+    if len(s.queue) == 0 {
+        ws.Write([]byte("error: no available rooms"))
+        ws.Close()
         return
     }
 
-	s.mu.Lock()
-	room, exists := s.rooms[data.RoomID]
-	if !exists {
-		room = &Room{
-			roomID: data.RoomID,
-			conns:  make(map[*websocket.Conn]bool),
-			game: nil,
-			players: make(map[*game.Player]*websocket.Conn),
-			
-		}
-		s.rooms[data.RoomID] = room
-	}
+    roomID := s.queue[0]
+    s.queue = s.queue[1:]
+    room := s.rooms[roomID]
 
-	s.mu.Unlock()
+    params := ws.Request().URL.Query()
 
-	//at this point, we should have the user data rdy from the websocket
-	room.addConnection(ws, data.Player)
+    playerID := params.Get("pid")
+    if playerID == "" {
+        ws.Write([]byte("error: missing player ID"))
+        ws.Close()
+        return
+    }
 
-	
-	if len(room.players) == 2 {
-		currentPlayers := [2]*game.Player{nil, nil}
+    clr := params.Get("clr")
+    color, err := strconv.Atoi(clr)
+    if err != nil {
+        ws.Write([]byte("error: invalid color"))
+        ws.Close()
+        return
+    }
 
-		i := 0
-		for player, _:= range room.players {
-			currentPlayers[i] = player
-			i += 1
-		}
+    newPlayer := &game.Player{
+        PlayerID: playerID,
+        Color:    game.Color(color),
+    }
 
-		fmt.Println("game started!!!: ", currentPlayers[0], "vs", currentPlayers[1])
-		room.game = game.CreateGame(15)
-	}
+    room.addConnection(ws, newPlayer)
 
-	s.readLoop(ws, room)
+    s.mu.Unlock()
 
-	room.removeConnection(ws)
+    s.gameLoop(ws, room)
+    room.removeConnection(ws)
 }
 
-func (s *Server) readLoop(ws *websocket.Conn, room *Room) {
+
+func (s *Server) gameLoop(ws *websocket.Conn, room *Room) {
 	buf := make([]byte, 1024)
 	for {
 		n, err := ws.Read(buf)
