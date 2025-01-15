@@ -3,20 +3,12 @@ package main
 import (
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
+	"playgomoku/backend/server"
 
-	"playgomoku/backend/api"
-	"playgomoku/backend/middleware"
+	"golang.org/x/net/websocket"
 )
-
 func main() {
-    r := chi.NewRouter()
-	r.Use(middleware.JSONMiddleware)
-
-
-	api.NewGameRoutes(r)
-	api.NewBoardRoutes(r)
-
-	http.ListenAndServe(":3000", r)
-
+	server := server.NewServer()
+	http.Handle("/ws", websocket.Handler(server.HandleWS))
+	http.ListenAndServe(":3000", nil)
 }

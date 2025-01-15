@@ -1,18 +1,15 @@
-package board
+package game
 
-import (
-	"playgomoku/backend/game/structs"
-)
 
 type Board struct {
 	Size int
-	Grid [][]structs.Color
+	Grid [][]Color
 }
 
 func CreateBoard(size int) *Board {
-	grid := make([][]structs.Color, size) 
+	grid := make([][]Color, size) 
 	for i := range grid {
-		grid[i] = make([]structs.Color, size)
+		grid[i] = make([]Color, size)
 	}
 	
 	return &Board{
@@ -21,7 +18,7 @@ func CreateBoard(size int) *Board {
 	}
 }
 
-func (board *Board) PlaceStone(i int, j int, color structs.Color) bool {
+func (board *Board) PlaceStone(i int, j int, color Color) bool {
 	if !board.IsValidMove(i, j) || board.Grid[i][j] != 0 {
 		return false;
 	}
@@ -43,7 +40,7 @@ func(board *Board) ClearStones() {
 	}
 }
 
-func (board *Board) CheckWin(move structs.Move) bool {
+func (board *Board) CheckWin(move Move) bool {
 	r, c := move.R, move.C
 	color := move.Player.Color
 	directions := [8][2]int{{1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}}

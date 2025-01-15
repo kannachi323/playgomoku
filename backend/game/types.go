@@ -1,4 +1,4 @@
-package structs
+package game
 
 type Result int
 const (
@@ -26,7 +26,7 @@ type Move struct {
 }
 
 type Player struct {
-    ID    int
+    ID    string
     Name  string
     Color Color
 }
