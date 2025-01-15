@@ -8,69 +8,51 @@ import (
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
 	"golang.org/x/net/websocket"
 )
 
 type Server struct {
 	rooms map[string]*Room
-	queue []string
 	mu    sync.Mutex
 	startTime time.Time
 }
 
 func NewServer() *Server {
 	defaultRooms := make(map[string]*Room)
-	defaultQueue := make([]string, 0)
 
-	for i := 0; i < 5; i++ {
-		newRoomID := uuid.New().String()
-		defaultRooms[newRoomID] = &Room{
-			roomID: uuid.New().String(),
-			conns: make(map[*websocket.Conn]bool),
-			game: nil,
-			players: make(map[*game.Player]*websocket.Conn),
-		}
-		defaultQueue = append(defaultQueue, newRoomID)
+	defaultRooms["sexy"] = &Room{
+		roomID: "sexy",
+		conns: make(map[*websocket.Conn]bool),
+		game: nil,
+		players: make(map[*game.Player]*websocket.Conn),
 	}
 
 	return &Server{
 		rooms: defaultRooms,
-		queue: defaultQueue,
 		startTime: time.Now(),
 	}
 }
 
 func (s *Server) HandleWS(ws *websocket.Conn) {
-    // Handle incoming WebSocket connection
-    s.mu.Lock()
-    defer s.mu.Unlock() // Ensures the mutex is always released, even on early return
+    ws.Write([]byte(fmt.Sprintf("Incoming WebSocket connection from: %s\n", ws.RemoteAddr())))
 
-    ws.Write([]byte(fmt.Sprintf("Incoming WebSocket connection from: %s", ws.RemoteAddr())))
-
-    if len(s.queue) == 0 {
-        ws.Write([]byte("error: no available rooms"))
-        ws.Close()
+    room := s.rooms["sexy"]
+    if room == nil {
+        fmt.Println("error: room not found")
         return
     }
 
-    roomID := s.queue[0]
-    s.queue = s.queue[1:]
-    room := s.rooms[roomID]
-
     params := ws.Request().URL.Query()
-
     playerID := params.Get("pid")
     if playerID == "" {
-        ws.Write([]byte("error: missing player ID"))
-        ws.Close()
+        fmt.Println("error: player ID not found")
         return
     }
 
     clr := params.Get("clr")
     color, err := strconv.Atoi(clr)
     if err != nil {
-        ws.Write([]byte("error: invalid color"))
+        fmt.Println("error: invalid color")
         ws.Close()
         return
     }
@@ -81,10 +63,11 @@ func (s *Server) HandleWS(ws *websocket.Conn) {
     }
 
     room.addConnection(ws, newPlayer)
-
-    s.mu.Unlock()
+    
+	fmt.Println("Player joined room:", room.roomID)
 
     s.gameLoop(ws, room)
+
     room.removeConnection(ws)
 }
 

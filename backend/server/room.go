@@ -28,9 +28,6 @@ func (rm *Room) addConnection(ws *websocket.Conn, player *game.Player) {
     rm.conns[ws] = true
     rm.players[player] = ws
 
-	rm.mu.Lock()
-	ws.Write([]byte(fmt.Sprintf("Player %s joined room %s\n", player.PlayerID, rm.roomID)))
-	rm.mu.Unlock()
 }
 
 

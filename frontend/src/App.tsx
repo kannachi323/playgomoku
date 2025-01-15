@@ -1,5 +1,4 @@
 import './App.css';
-import { Conn } from './types';
 
 import { useState } from 'react';
 
@@ -8,29 +7,16 @@ function App() {
   const [msg, setMsg] = useState<string>('');
   const [socket, setSocket] = useState<WebSocket | null>(null);
 
-  const joinWebSocket = () => {
+  function joinRoom() {
     if (socket) {
       console.log('Already connected to the WebSocket');
       return;
     }
 
-    const newSocket: WebSocket = new WebSocket('ws://localhost:3000/ws');
-    
-    newSocket.onopen = () => {
-      const data: Conn = {
-        type: 'join',
-        roomID: '1',
-        player: {
-          id: 'abc',
-          name: 'Matt',
-          color: 1,
-        }
-        
-      };
+    const pid = "def";
+    const clr = "2"
 
-      newSocket.send(JSON.stringify(data));
-      console.log('Attempted to connect');
-    };
+    const newSocket: WebSocket = new WebSocket(`ws://localhost:3000/ws?pid=${pid}&clr=${clr}`);
 
     newSocket.onmessage = (event) => {
       console.log('server: ', event.data);
@@ -55,7 +41,7 @@ function App() {
 
   return (
     <>
-      <button onClick={joinWebSocket}>Join WebSocket</button>
+      <button onClick={joinRoom}>Join Room</button>
 
       <input
         onChange={(e) => {
