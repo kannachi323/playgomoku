@@ -1,15 +1,21 @@
 package server
 
-import "playgomoku/backend/game"
-
-type PlayerData struct {
-    PlayerID  string `json:"id"`
-	Color game.Color `json:"color"`
+type GameState struct {
+    Board [][]*Stone   `json:"board"`
+    Size    int     `json:"size"`
+    Players []Player `json:"players"`
+    Turn    string  `json:"turn"`
+    Status  string  `json:"status"`
 }
 
-type ConnData struct {
-    RoomID  string  `json:"roomID"`
-    Player *game.Player  `json:"player"`
-    Type string `json:"type"`
+
+type Stone struct {
+    R     int       `json:"r"`
+    C     int       `json:"c"`
+    Color string    `json:"color"`
 }
 
+type Player struct {
+    ID          string    `json:"id"`
+    Username    string    `json:"username"`
+}

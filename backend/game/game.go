@@ -1,39 +1,24 @@
 package game
 
-import (
-	"sync"
-
-	"github.com/google/uuid"
-)
-type Game struct {
-    GameManager *GameManager
-    GameID string
+type GameState struct {
+    Board [][]*Stone   `json:"board"`
+    Size    int     `json:"size"`
+    Players []*Player `json:"players"`
+    Turn    string  `json:"turn"`
+    Status  string  `json:"status"`
 }
 
-type GameManager struct {
-    Status  Status
-    Result  Result
-    Board   *Board
-    PlayerTurn int
-    Moves []Move
-    mu sync.Mutex
-}
 
-func CreateGame(boardSize int) *Game {
-    gameID := uuid.New().String()
 
-    gameManager := &GameManager{
-        Status: Active,
-        Result: Pending,
-        Board: CreateBoard(boardSize),
-        PlayerTurn: 1,
-        Moves: make([]Move, 0),
+func CreateGameState(size int, p1 Player, p2 Player) *GameState {
+
+    newGameState := &GameState{
+       Board: NewEmptyBoard(size),
+       Size: size,
+       Players: NewPlayers(p1, p2),
+       Turn: p1.ID,
+       Status: "active",
     }
 
-    game := &Game{
-        GameManager: gameManager,
-        GameID: gameID,
-    }
-
-    return game
+    return newGameState
 }
