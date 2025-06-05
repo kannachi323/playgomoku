@@ -1,30 +1,27 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 import { GameContext } from './GameContext'
 import { ServerMessage, GameState } from '../types';
-import { createConnection } from '../utils/connection';
 import { createGame } from '../utils/game';
 
 
 export const GameProvider = ({ children }: { children: React.ReactNode }) => {
-  useEffect(() => {
-    //TODO: check auth here
-  
-  }, []);
-
   const [gameState, setGameState] = useState<GameState>(createGame());
-  
-  const conn = createConnection(gameState.players.p2, update);
+  const [conn, setConn] = useState<WebSocket | null>(null);
+
 
   function update(payload: ServerMessage) {
-    if (payload.type === "update") {
-      setGameState(payload.data.gameState);
+    if (payload.type === "gameUpdate") {
+      setGameState(payload.data.gameState)
+      console.log("Game updated:", payload);
+    } else if (payload.type === "chat") {
+      console.log("Chat message:", payload);
     }
   }
 
   return (
-    <GameContext.Provider value={{ gameState, update, conn }}>
+    <GameContext.Provider value={{ gameState, update, conn, setConn }}>
       {children}
     </GameContext.Provider>
   );

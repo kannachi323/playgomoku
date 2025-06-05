@@ -1,22 +1,35 @@
 package server
 
 import (
+	"playgomoku/backend/api"
+	"playgomoku/backend/manager"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-
-	"playgomoku/backend/api"
 )
 
 type Server struct {
-	Router *chi.Mux
+	Router       *chi.Mux
+	LobbyManager *manager.LobbyManager
 	//can add db later
 }
 
+
 func CreateServer() *Server {
-	s := &Server{}
-	s.Router = chi.NewRouter()
+	s := &Server{
+		Router: chi.NewRouter(),
+		LobbyManager: manager.NewLobbyManager(),
+	}
+
 	return s
+}
+
+func (s *Server) MountResources() {
+	
+	// create all the lobbies
+	s.LobbyManager.CreateLobby(100, "9x9")
+
 }
 
 func (s *Server) MountHandlers() {
@@ -36,7 +49,9 @@ func (s *Server) MountHandlers() {
 
 	//all other handlers
 	s.Router.Post("/new-game-state", api.NewGameState)
-}
 
+
+	s.Router.Get("/join-lobby", api.JoinLobby(s.LobbyManager))
+}
 
 

@@ -22,7 +22,7 @@ func NewGameState(w http.ResponseWriter, r *http.Request) {
 	p2 := reqBody.P2
 
 
-	newGameState := game.CreateGameState(size, p1, p2)
+	newGameState := game.CreateGameState(size, &p1, &p2)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(newGameState)

@@ -2,7 +2,7 @@ import {ServerMessage, Player} from '../types'
 
 
 export function createConnection(player: Player, onMessage : (data: ServerMessage) => void) {
-  const socket = new WebSocket(`ws://localhost:8080/ws?pid=${player.playerID}&color=${player.color}`);
+  const socket = new WebSocket(`ws://localhost:3000/join-lobby?type=9x9`);
 
   socket.onopen = () => {
     //TODO: show a popup that starts the game

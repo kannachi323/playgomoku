@@ -63,7 +63,7 @@ func TestNewGameState(t *testing.T) {
 	err = json.Unmarshal(response.Body.Bytes(), &actual)
 	require.NoError(t, err)
 
-	expected := game.CreateGameState(19, p1, p2)
+	expected := game.CreateGameState(19, &p1, &p2)
 	
 
 	require.Equal(t, expected, actual)

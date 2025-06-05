@@ -1,34 +1,21 @@
 import {GomokuBoard} from "../components/Board";
 import { PlayerBanner } from "../components/Banner";
 
-import { GameProvider } from "../contexts/GameProvider";
 
+
+import { createConnection, sendData } from "../utils/connection";
+
+import { useGameContext } from "../hooks/useGameContext";
 export default function Play() {
 
-  async function createGameState() {
-    try {
-      const response = await fetch('http://localhost:3000/new-game-state', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          p1: {ID: '1', Username: 'Alice'},
-          p2: {ID: '2', Username: 'Bob'},
-          size: 19,
-        })
-      })
-      const data = await response.json();
-      console.log(data);
-    } catch (error) {
-      //show a popup if there's something wrong
-      console.log(error)
-    }
+  const {conn, setConn, gameState, update} = useGameContext();
+
+  if (!gameState) {
+    return;
   }
 
 
   return (
-    <GameProvider>
       <div className="w-full h-[90vh] grid grid-cols-17 bg-red-50">
         <div className="col-span-4">
           <PlayerBanner />
@@ -41,14 +28,23 @@ export default function Play() {
         </div>
         <div className="col-span-4">
           <button className="border-2 outline-2 w-full"
-            onClick={() => createGameState()}
+          
+            onClick={() => setConn(createConnection(gameState.players.p1, update))}
           >
-            hello
+            join game
+          </button>
+          <button className="border-2 outline-2 w-full"
+          
+            onClick={() => {
+              if (!conn) return;
+              sendData(conn, {data: "aldkfja;sdkljas;dkl"})
+            }}
+          >
+            send data
           </button>
         </div>
         
       </div>
-    </GameProvider>
-   
+
   );
 }
