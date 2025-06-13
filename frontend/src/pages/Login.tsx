@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function SignUp() {
+export default function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -22,28 +22,26 @@ export default function SignUp() {
       return;
       }
 
-      console.log("User registered:", formData);
-
-      const res = await fetch("http://localhost:3000/signup", {
-          method: "POST",
-          headers: {
-              "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: formData.email, password: formData.password }),
-      })
+      const res = await fetch("http://localhost:3000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
+      });
 
       if (res.ok) {
         navigate('/');
       }
       
-      setFormData({ email: '', password: '' });
   };
 
   return (
     <div className="w-full h-[90vh] p-10 flex items-center justify-center bg-[#171513] text-white">
       <div className="w-1/3 h-5/6 bg-[#262322] p-10 rounded-md">
          <form className="flex flex-col gap-10" onSubmit={(e) => handleSubmit(e)} >
-          <h2 className="text-3xl text-center font-bold">Sign up</h2>
+          <h2 className="text-3xl text-center font-bold">Log in</h2>
 
           <label>
             <p className="mb-2">Email</p>
@@ -69,13 +67,14 @@ export default function SignUp() {
               required
               className="outline-2 outline-[#454340] rounded-sm focus:ring-0 focus:outline-2 focus:outline-white p-3 w-full mb-2"
             />
+            <a href="/forgot-password" className="text-blue-300 underline">Forgot Password?</a>
           </label>
 
           <button type="submit" style={{ padding: '10px 20px' }} className="bg-[#363430] text-white rounded-sm hover:bg-[#454340] transition-colors duration-300">
-            Sign Up
+            Log In
           </button>
 
-          <p className="text-blue-300 self-center">Already have an account? <a href="/login" className="underline">Log in</a></p>
+          <p className="text-blue-300 self-center">Don't have an account? <a href="/signup" className="underline">Sign up</a></p>
         </form>
       </div>
 
