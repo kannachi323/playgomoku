@@ -9,6 +9,11 @@ import { Board } from "../../../features/Board";
 import { ChatBox } from "../../../features/Chat/ChatBox";
 import { GameModal } from "./GomokuModal";
 
+/*TODO: need to implement game state saving after refresh (use database :)
+Matthew pls do this asap lol this is pretty important
+*/
+
+
 export default function GomokuGame() {
   const { gameState, setPlayer, setOpponent, player, opponent } = useGameStore();
   const { user } = useAuthStore();
