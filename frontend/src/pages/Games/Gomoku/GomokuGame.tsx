@@ -4,7 +4,6 @@ import { Timer } from "../../../components/Timer"
 import { PlayerBanner } from "../../../components/Banner"
 import { GamePanel } from "./GamePanel"
 import { useGameStore } from "../../../stores/useGameStore";
-import { useAuthStore } from "../../../stores/useAuthStore";
 import { Board } from "../../../features/Board"; 
 import { ChatBox } from "../../../features/Chat/ChatBox";
 import { GameModal } from "./GomokuModal";
@@ -16,17 +15,14 @@ Matthew pls do this asap lol this is pretty important
 
 export default function GomokuGame() {
   const { gameState, setPlayer, setOpponent, player, opponent } = useGameStore();
-  const { user } = useAuthStore();
 
   useEffect(() => {
     //This effect adds the player clocks from server
-    if (!user || !gameState) return
+    if (!player || !gameState) return
     const p1 = gameState.players[0]
     const p2 = gameState.players[1]
-    const player = p1.playerID == user.id ? p1 : p2
-    const opponent = p1.playerID == user.id ? p2 : p1
-    setPlayer(player)
-    setOpponent(opponent)
+    setPlayer(p1.playerID == player.playerID ? p1 : p2)
+    setOpponent( p1.playerID == player.playerID ? p2 : p1)
   }, [gameState])
 
   return (
